@@ -76,7 +76,7 @@ ___
 
 각 인코더 레이어는 두 개의 서브층으로 구성되어있다.
 
-입력 -> Self-Attention -> Feed Forward Network -> 출력
+입력 -> Self-Attention -> Add&Norm -> Feed Forward Network -> Add&Norm -> 출력
 
 
 1. Self-Attention (Encoder)
@@ -112,7 +112,14 @@ ___
     어텐션 레이어를 지나면 Fully-connected Feed-forward Network를 지난다.
 
     하나의 인코더 블록 내에서는 다른 문장이나 단어들 마다 동일하게 사용되지만 인코더 마다 다른 값을 가지게 된다.
-
+    
+    -> 이 과정을 해주는 이유! NNLM이라는 모델이 이 모델인데, 훈련 시퀀스 데이터들에 없었던 토큰이 등장해도 유사한 토큰을 인식해서 보다 정확한 예측을 하게 도와줌
+    
+3. Add & Norm
+    
+    잔차 연결(Residual Connection) & 정규화
+    
+    모델이 더 정확한 학습을 할 수 있도록 도와줌
 ___
 
 ## Decoder
