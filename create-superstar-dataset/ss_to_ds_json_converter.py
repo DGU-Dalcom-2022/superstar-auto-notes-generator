@@ -4,7 +4,10 @@ from glob import glob
 OUTPUT_DIR = "./ssdsconverter_output/"
 
 class SSDSJsonConverter():
-    def __init__(self, output_path):
+    def __init__(self):
+        pass
+
+    def set_output_path(self, output_path):
         self.output_path = output_path
         if not os.path.isdir(self.output_path):
             os.makedirs(self.output_path)
@@ -26,9 +29,8 @@ class SSDSJsonConverter():
         output_file.close()
 
 if __name__ == '__main__':
-    
-    converter = SSDSJsonConverter(OUTPUT_DIR)
-
+    converter = SSDSJsonConverter()
+    converter.set_output_path(OUTPUT_DIR)
     json_dir = glob("./SuperStarResource/json/*")
     for gametype_dir in json_dir:
         json_path_list = glob(gametype_dir+"/*.json")
