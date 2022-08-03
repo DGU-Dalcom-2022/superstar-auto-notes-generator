@@ -17,9 +17,15 @@ from scripts.training.data import create_dataset, create_dataloader
 from models import create_model
 import random
 from scripts.training.options.train_options import TrainOptions
+import json
 
 if __name__ == '__main__':
+    add_opt = json.loads(open("./block_placement_ddc2/opt.json","r").read())
     opt = TrainOptions().parse()
+    for add_item in add_opt:
+        opt.__dict__[add_item] = add_opt[add_item]
+    opt.gpu_ids = False
+    opt.continue_train = False
     model = create_model(opt)
     model.setup()
     if opt.model=='wavenet' or opt.model=='adv_wavenet':
