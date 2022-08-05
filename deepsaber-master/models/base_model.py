@@ -194,7 +194,8 @@ class BaseModel:
                 save_path = os.path.join(self.save_dir, save_filename)
                 net = getattr(self, 'net' + name)
 
-                if len(self.gpu_ids) > 0 and torch.cuda.is_available():
+                #if len(self.gpu_ids) > 0 and torch.cuda.is_available():
+                if  torch.cuda.is_available():
                     torch.save(net.module.state_dict(), save_path)
                     net.cuda(self.gpu_ids[0])
                 else:

@@ -110,3 +110,6 @@ if __name__ == '__main__':
             losses_val = model.get_current_losses(is_val=True)
             metrics_val = model.get_current_metrics(is_val=True)
             print("Validated parameters at epoch {:d} \t Time Taken: {:d} sec".format(epoch, int(time.time() - val_start_time)))
+
+
+print("done")

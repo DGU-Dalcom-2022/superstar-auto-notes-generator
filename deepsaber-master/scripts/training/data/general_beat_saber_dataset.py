@@ -40,6 +40,7 @@ class GeneralBeatSaberDataset(BaseDataset):
         data_path = Path(opt.data_dir)
         if not data_path.is_dir():
             raise ValueError('Invalid directory:'+opt.data_dir)
+        print(Path.absolute(data_path))
         candidate_audio_files = sorted(data_path.glob('**/*.egg'), key=lambda path: path.parent.__str__())
         self.level_jsons = []
         self.info_jsons = []
@@ -53,7 +54,9 @@ class GeneralBeatSaberDataset(BaseDataset):
             #print(path)
             features_file = path.__str__()+"_"+self.opt.feature_name+"_"+str(self.opt.feature_size)+".npy"
             level_file_found = False
+            
             for diff in self.opt.level_diff.split(","):
+                print(path.parent.__str__())
                 if Path(path.parent.__str__()+"/"+diff+".dat").is_file():
                     level_file_found = True
             if not level_file_found:
