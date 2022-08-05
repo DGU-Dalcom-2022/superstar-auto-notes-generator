@@ -235,4 +235,4 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,macos,windows
 
 SuperStarResource/
-ssdsconverter_output/
+create-superstar-dataset/ssdsconverter_output/
