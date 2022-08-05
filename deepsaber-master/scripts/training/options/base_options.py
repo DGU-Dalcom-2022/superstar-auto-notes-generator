@@ -66,19 +66,30 @@ class BaseOptions:
 
     def gather_options(self):
         # get the basic options
+        add_opt = json.loads(open("./block_placement_ddc2/opt.json","r").read())
+
+        
         opt, _ = self.parser.parse_known_args()
 
+        for add_item in add_opt:
+            opt.__dict__[add_item] = add_opt[add_item]
+            
         # load task module and task-specific options
         task_name = opt.task
         task_options = importlib.import_module("{}.options.task_options".format(task_name))  # must be defined in each task folder
         self.parser = argparse.ArgumentParser(parents=[self.parser, task_options.TaskOptions().parser])
         opt, _ = self.parser.parse_known_args()
-
+        for add_item in add_opt:
+            opt.__dict__[add_item] = add_opt[add_item]
+            
         # modify model-related parser options
         model_name = opt.model
         model_option_setter = models.get_option_setter(model_name, task_name)
         parser = model_option_setter(self.parser, self.is_train)
         opt, _ = parser.parse_known_args()  # parse again with the new defaults
+        for add_item in add_opt:
+            opt.__dict__[add_item] = add_opt[add_item]
+        
 
         # modify dataset-related parser options fsldkn
         dataset_name = opt.dataset_name
