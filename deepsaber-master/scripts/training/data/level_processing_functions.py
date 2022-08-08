@@ -218,6 +218,7 @@ def get_binary_reduced_tensors_from_level_faster(blocks_reduced_classes, indices
     block_reduced_targets_windows = [blocks_reduced_classes[
                                      i + time_offset + receptive_field - 1:i + time_offset + receptive_field - 1 + output_length,
                                      :] for i in indices]
+    print()
     block_reduced_targets_windows = torch.tensor(block_reduced_targets_windows, dtype=torch.long)
     return block_reduced_targets_windows
 
