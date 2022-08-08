@@ -1,7 +1,8 @@
+# json 파일 구조 변경 모듈
+
 import json
 import os
 from glob import glob
-OUTPUT_DIR = "./ssdsconverter_output"
 
 class SSDSJsonConverter():
     def __init__(self):
@@ -14,33 +15,38 @@ class SSDSJsonConverter():
             os.makedirs(self.output_path)
 
     def get_difficulty(self, song_idx_num):
-        return {'4' : 'Easy.dat', '7' : 'Normal.dat', '13' : 'Hard.dat'}.get(song_idx_num, '-1')
+        return {'4' : 'Easy.dat', '7' : 'Expert.dat', '13' : 'ExpertPlus.dat'}.get(song_idx_num, '-1')
     
-    def convert(self, input_path, output_path):
-        self.set_output_path(output_path)
+    def convert(self, input_path):
 
         song_title = input_path.split('/')[-1].split('_')[:-1]
         song_idx_num = input_path.split('/')[-1].split('_')[-1].split('.')[0]
         song_title = '_'.join(song_title)
         song_diff = self.get_difficulty(song_idx_num)
         if song_diff == '-1':
-            return print(input_path + ' : 잘못된 난이도 설정')
+            return print('잘못된 난이도 설정 : '+input_path)
 
-        self.set_output_path(self.output_path+'/'+song_title)
         output_file = open(self.output_path+'/'+song_diff, 'w')
 
-        old_notes = json.load(open(input_path.__str__(), "r"))["notes"]
+        old_json = json.load(open(input_path.__str__(), "r"))
+        old_notes = old_json["notes"]
         new_note_list = []
         for idx in old_notes:
             for old_note in old_notes[idx]:
                 time = old_note["sec"]
                 new_note = {"_time": time, "_lineIndex": idx, "_lineLayer": 0, "_type": 0, "_cutDirection": 0}
                 new_note_list.append(new_note)
-        new_notes = {"_notes": sorted(new_note_list, key=lambda x: x['_time'])}
 
-        output_file.write(json.dumps(new_notes))
+        new_notes = sorted(new_note_list, key=lambda x: x['_time'])
+        bpm = old_json["seqTempos"][0]["beatPerMinute"]
+        new_json = {'_beatsPerMinute': bpm, '_notes': new_notes}
+
+        output_file.write(json.dumps(new_json))
         output_file.close()
+        return self.output_path+'/'+song_diff
 
+# 하단의 코드는 이 파일을 단독으로 실행할 경우만 사용됨
+OUTPUT_DIR = "./ssdsconverter_output"
 if __name__ == '__main__':
     converter = SSDSJsonConverter()
     json_dir = glob('../SuperStarResource/json/*')
