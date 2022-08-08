@@ -20,6 +20,8 @@ import os
 import sys
 import models.constants as constants
 from collections import Counter
+from pathlib import Path
+import pickle
 
 from scripts.feature_extraction.feature_extraction import extract_features_chroma, extract_features_mfcc, \
     extract_features_hybrid_beat_synced
@@ -62,6 +64,7 @@ def produce_distinct_state_space_representations(data_directory=EXTRACT_DIR, k=2
         list_of_states.extend(states_as_tuples)  # Add to overall state list
 
     # Now all files are analysed, identify distinct sets
+    print(type(list_of_states[0]))
     total_nb_states = len(list_of_states)
     state_frequencies = Counter(list_of_states)  # Count the frequency of every state
     distinct_states = state_frequencies.keys()  # Get distinct states. This avoids a set method which loses count info
@@ -71,6 +74,9 @@ def produce_distinct_state_space_representations(data_directory=EXTRACT_DIR, k=2
     # We now have the states sorted by frequency
     sorted_states_by_frequency = sorted(state_frequencies, key=state_frequencies.get, reverse=True)
     sorted_states_count = sorted(distinct_state_frequencies, reverse=True)
+    print(type(sorted_states_by_frequency))
+    sorted_states_by_frequency.pop(0)
+    sorted_states_count.pop(0)
     # Total number of states is len(list_of_states)
     top_k_representation = np.sum(sorted_states_count[:k])
     print(" We have " + str(nb_of_distinct_states) + " distinct states in our dataset")
@@ -124,12 +130,76 @@ def grid_cell_to_json_note(grid_index, grid_value, time, bpm, hop, sr):
 
 def compute_explicit_states_from_bs_level(bs_level, as_tuple = True):
     '''Extract state representation from BeatSaber level.'''
+    notes = bs_level["notes"]  # Parse the JSON notes to use the notes representation
+    #print("notes",notes)
+    #print("columns",notes.columns.tolist())
+    #print("notes time",notes["_time"])
+    #note_times = set(notes["_time"])  # Extract the distinct note times
+    #state_dict = {eventTime: np.zeros(12) for eventTime in note_times}  # Initialise a state at every time event
+    # for entry in notes.itertuples():
+    
+    note_sec = set()
+
+    for index in notes:
+        for i in notes[index]:
+            note_sec.add(i['sec'])
+    state_dict1 = {everyTime:np.zeros(13)for everyTime in note_sec}
+    state_dict2 = {everyTime:np.zeros(13)for everyTime in note_sec}
+    for index in notes:
+        for i in notes[index]:
+            if i['property'] == 0:
+                tempInt = 1
+                tempInt1 = 1
+            else:
+                tempInt = i['property']
+                tempInt1 = 0
+            state_dict1[i['sec']][int(index)] = tempInt
+            state_dict2[i['sec']][int(index)] = tempInt1
+    states_as_tuples = {time: tuple(state) for time, state in state_dict1.items()}
+    states_as_tuples1 = {time: tuple(state) for time, state in state_dict2.items()}
+    return states_as_tuples1
+
+    state_dict_tuples = {}
+    for index in notes:
+        for i in notes[index]:
+            state_tuple = (i['sec'],index)
+            state_dict_tuples[i['sec']] = index
+            print(state_tuple)
+            #state_dict_tuples.update(state_tuple)
+            #state_tuple_list.append(state_tuple)
+    #return state_dict_tuples
+    
+    for i,entry in notes.iterrows():
+        entry_cut_direction = entry["_cutDirection"]  # Extract the individual note parts
+        entry_col = entry["_lineIndex"]
+        entry_row = entry["_lineLayer"]
+        entry_time = entry["_time"]
+        entry_type = entry["_type"]
+        entry_index = int(4 * entry_row + entry_col)  # Compute Index to update in the state representation
+        if entry_type == 3:  # This is a bomb
+            entry_representation = 19
+        else:  # This is a note
+            entry_representation = 1 + 9 * entry_type + entry_cut_direction
+        # Now Retrieve and update the corresponding state representation
+        # print(entry_time, entry_index)
+        try:
+            state_dict[entry_time][entry_index] = entry_representation
+        except:
+            continue  # some weird notes with too big or small lineLayer / lineIndex ??
+    if not as_tuple:
+        return state_dict, note_times
+    else:  # Tuples can be hashed
+        states_as_tuples = {time: tuple(state) for time, state in state_dict.items()}
+        return states_as_tuples
+
+def compute_explicit_states_from_bs_level1(bs_level, as_tuple = True):
+    '''Extract state representation from BeatSaber level.'''
     notes = bs_level["_notes"]  # Parse the JSON notes to use the notes representation
     #print("notes",notes)
     #print("columns",notes.columns.tolist())
     #print("notes time",notes["_time"])
     note_times = set(notes["_time"])  # Extract the distinct note times
-    state_dict = {eventTime: np.zeros(12) for eventTime in note_times}  # Initialise a state at every time event
+    state_dict = {eventTime: np.zeros(13) for eventTime in note_times}  # Initialise a state at every time event
     # for entry in notes.itertuples():
     for i,entry in notes.iterrows():
         entry_cut_direction = entry["_cutDirection"]  # Extract the individual note parts
@@ -153,6 +223,7 @@ def compute_explicit_states_from_bs_level(bs_level, as_tuple = True):
     else:  # Tuples can be hashed
         states_as_tuples = {time: tuple(state) for time, state in state_dict.items()}
         return states_as_tuples
+
 
 
 def compute_shortest_inter_event_beat_gap(data_directory):
@@ -268,16 +339,23 @@ def get_block_sequence_with_deltas(json_file, song_length, bpm, step_size, top_k
 
 
 if __name__ == "__main__":
-    sorted_states, states_counts = produce_distinct_state_space_representations(EXTRACT_DIR, k=1000)
+    temp = Path("../../data/extracted_data")
+    print(temp.absolute())
+    sorted_states, states_counts = produce_distinct_state_space_representations(temp, k=1000)
     sorted_states_prior_probability = np.divide(states_counts, sum(states_counts))
-    output_path = DATA_DIR+"/statespace/"
+
+    #output_path = DATA_DIR+"/statespace/"
+    output_path = Path("../../data/statespace")
     if not os.path.isdir(output_path):
         os.mkdir(output_path)
     io_functions.saveFile(sorted_states, 'sorted_states.pkl', output_path, append=False)
     io_functions.saveFile(sorted_states_prior_probability, 'sorted_states_prior_probability.pkl', output_path,
                           append=False)
-    sorted_states_transition_probabilities = produce_transition_probability_matrix_from_distinct_state_spaces(
-        sorted_states, EXTRACT_DIR)
-    io_functions.saveFile(sorted_states_transition_probabilities, 'sorted_states_transition_probabilities.pkl',
-                          output_path, append=False)
+    print(Path("../../data/statespace/sorted_states.pkl").absolute())
+    unique_states = pickle.load(open("../../data/statespace/sorted_states.pkl","rb"))
+    print('a')
+    #sorted_states_transition_probabilities = produce_transition_probability_matrix_from_distinct_state_spaces(
+    #    sorted_states, EXTRACT_DIR)
+    #io_functions.saveFile(sorted_states_transition_probabilities, 'sorted_states_transition_probabilities.pkl',
+    #                      output_path, append=False)
     # compute_shortest_inter_event_beat_gap(EXTRACT_DIR)

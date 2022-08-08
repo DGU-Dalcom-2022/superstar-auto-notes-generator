@@ -194,7 +194,8 @@ def get_all_json_level_files_from_data_directory(data_directory, include_autosav
     if include_autosaves:
         file_regex = re.compile("^.*(Easy|Normal|Hard|Expert|ExpertPlus)\\.json$")
     else:
-        file_regex = re.compile("^(Easy|Normal|Hard|Expert|ExpertPlus)\\.json$")
+        #file_regex = re.compile("^(Easy|Normal|Hard|Expert|ExpertPlus)\\.json$")
+        file_regex = re.compile("^.*(4|7|13)\\.json$")
     json_files = []
     for root, subdirectories, files in os.walk(data_directory):
         for name in files:
@@ -202,6 +203,7 @@ def get_all_json_level_files_from_data_directory(data_directory, include_autosav
                 json_path = os.path.join(root, name)
                 json_files.append(json_path)
     return json_files
+
 
 
 def get_list_of_downloaded_songs():
