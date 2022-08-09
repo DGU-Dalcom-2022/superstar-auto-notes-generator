@@ -161,7 +161,7 @@ class GeneralBeatSaberDataset(BaseDataset):
         # for short
         y = features #dimensions of y are: features x time OR features x window_sizes x time
         # print(y.shape)
-
+        sequence_length = y.shape[-1]
         receptive_field = self.receptive_field
         # we pad the song features with zeros to imitate during training what happens during generation
         # this is helpful for models that have a big receptive field like wavent, but we also use it with a receptive_field=1 for LSTM and Transformer
@@ -169,7 +169,7 @@ class GeneralBeatSaberDataset(BaseDataset):
             y = np.concatenate((np.zeros((y.shape[0],receptive_field+self.opt.time_shifts//2)),y),1)
             # we also pad at the end to allow generation to be of the same length of song, by padding an amount corresponding to time_shifts
             y = np.concatenate((y,np.zeros((y.shape[0],self.opt.time_shifts//2))),1)
-        elif len(y.shape) == 3: #two feature dimensions in y
+        elif len(y.shape) == 3: #two feature dimensions in 
             y = np.concatenate((np.zeros((y.shape[0],y.shape[1],receptive_field+self.opt.time_shifts//2)),y),2)
             # we also pad at the end to allow generation to be of the same length of song, by padding an amount corresponding to time_shifts
             y = np.concatenate((y,np.zeros((y.shape[0],y.shape[1],self.opt.time_shifts//2))),2)
@@ -178,7 +178,7 @@ class GeneralBeatSaberDataset(BaseDataset):
         # sample indices at which we will get opt.num_windows windows of the song to feed as inputs
             # TODO: make this deterministic, and determined by `item`, so that one epoch really corresponds to going through all the data..
         # sequence_length = min(y.shape[-1],self.opt.max_token_seq_len)
-        sequence_length = y.shape[-1]
+        #sequence_length = y.shape[-1]
         output_length = self.opt.output_length
         time_offset = self.opt.time_offset
         if self.opt.num_windows >= 1:

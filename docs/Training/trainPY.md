@@ -35,8 +35,48 @@
     block_reduced_targets_windows = [blocks_reduced_classes[
                                      i + time_offset + receptive_field - 1:i + time_offset + receptive_field - 1 + output_length,
                                      :] for i in indices]
+    모든 indices의 i마다
+    blocks_reduced_classes[i+time_offset+receptive_field-1:i+time_offset+receptive_field-1+output_length,:]
+    
+    
+    [start:stop:step]
+    step => 시작부분부터 해서 ex)  2이면 0 2 4 6 8 3이면 0 3 6
+    2:6:2이면 2 4 임 2:7:2면 2 4 6 임
+    
+    start : i+time_offset+receptive_field-1
+    stop : i+time_offset+receptive_field-1+output_length
+
+    i => indices임
+    indices => (10,1) 10개의 값이 존재 
+    ex) 10457, 19373, 13366, 14874, 5983, 5148, 20145, 7593, 17681, 18335임
+    time_offset => 0
+    receptive_field => 1
+    output_length => 100
+    다 opt임
+    이건 고정임
+    indices와 blocks_reduced_classes가 달라짐
+    indices+100이 blocks_reduced_classes의 length보다 길어지면 오류가 생김
+    blocks_reduced_classes => 전처리된 것임
+    indices = np.random.choice(
+        range(self.opt.time_shifts//2,sequence_length-(input_length+self.opt.time_shifts//2+self.opt.time_offset)),size=self.opt.num_windows,
+        replace=True
+        )
+    self.opt.time_shifts//2,sequence_length-(input_length+self.opt.time_shifts//2+self.opt.time_offset))
+    15 // 2, 
+    sequence_length는 y.shape[-1]
+    y는 80, 3, 21777 but blocks_reduced_classes는 size가 21762임
+    y => 그냥 feature 추출 
+    처음에는 같음 but 곡 생성때와 같은 방식으로 패딩을 진행, wavenet과 같은 거에 유리하기 때문에
+
+
     block_reduced_targets_windows = torch.tensor(block_reduced_targets_windows, dtype=torch.long)
     문제가 없을 시 
-    10x100x1 다 3
+    10x100x1 다 3,4
+    문제 발생
+    10x100x1이 아닌 그 중 하나의 리스트가 100이 아닌 97이 된다. expected sequence of length 100 at dim 1 (got 97)
+
+
+
+    
 
     
