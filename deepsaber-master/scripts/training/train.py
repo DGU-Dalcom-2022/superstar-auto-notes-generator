@@ -20,12 +20,18 @@ from scripts.training.options.train_options import TrainOptions
 import json
 
 if __name__ == '__main__':
+    
+    import torch
+    print(torch.cuda.is_available())
+    print(torch.cuda.device_count())
+    print(torch.cuda.get_device_name(0))
+
     add_opt = json.loads(open("./block_placement_ddc2/opt.json","r").read())
     opt = TrainOptions().parse()
     for add_item in add_opt:
         opt.__dict__[add_item] = add_opt[add_item]
-    opt.gpu_ids = False
-    opt.continue_train = True
+    
+    opt.continue_train = False
     model = create_model(opt)
     model.setup()
     if opt.model=='wavenet' or opt.model=='adv_wavenet':
