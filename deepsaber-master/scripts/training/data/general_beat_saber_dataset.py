@@ -41,7 +41,7 @@ class GeneralBeatSaberDataset(BaseDataset):
         if not data_path.is_dir():
             raise ValueError('Invalid directory:'+opt.data_dir)
         print(Path.absolute(data_path))
-        candidate_audio_files = sorted(data_path.glob('**/*.egg'), key=lambda path: path.parent.__str__())
+        candidate_audio_files = sorted(data_path.glob('SSB_*/*.egg'), key=lambda path: path.parent.__str__())
         self.level_jsons = []
         self.info_jsons = []
         self.audio_files = []
@@ -78,7 +78,8 @@ class GeneralBeatSaberDataset(BaseDataset):
             for diff in self.opt.level_diff.split(","):
                 try:
                     # blocks_reduced_file = path.__str__()+"_"+diff+"_blocks_reduced_.npy"
-                    blocks_reduced_classes_file = path.__str__()+diff+"_blocks_reduced_classes_.npy"
+                    #blocks_reduced_classes_file = path.__str__()+diff+"_blocks_reduced_classes_.npy"
+                    blocks_reduced_classes_file = path.__str__()+"_blocks_reduced_classes_.npy"
                     # blocks_reduced = np.load(blocks_reduced_file)
                     blocks_reduced_classes = np.load(blocks_reduced_classes_file)
                     # self.blocks_reduced_files.append(blocks_reduced_file)
@@ -87,9 +88,9 @@ class GeneralBeatSaberDataset(BaseDataset):
                     if len(json.load(open(level,"r"))["_notes"]) == 0:
                         print("Ignoring level with no notes")
                         continue
-                    info_file = list(path.parent.glob('./info.dat'))[0]
+                    #info_file = list(path.parent.glob('./info.dat'))[0]
                     self.level_jsons.append(level)
-                    self.info_jsons.append(info_file)
+                    #self.info_jsons.append(info_file)
                     self.audio_files.append(path)
                 except:
                     continue
@@ -97,9 +98,9 @@ class GeneralBeatSaberDataset(BaseDataset):
 
         assert self.audio_files, "List of audio files cannot be empty"
         assert self.level_jsons, "List of level files cannot be empty"
-        assert self.info_jsons, "List of info files cannot be empty"
+        #assert self.info_jsons, "List of info files cannot be empty"
         assert len(self.audio_files) == len(self.level_jsons)
-        assert len(self.audio_files) == len(self.info_jsons)
+        #assert len(self.audio_files) == len(self.info_jsons)
 
     @staticmethod
     def modify_commandline_options(parser, is_train):
@@ -130,12 +131,13 @@ class GeneralBeatSaberDataset(BaseDataset):
         return "GeneralBeatSaberDataset"
 
     def __getitem__(self, item):
+        
         song_file_path = self.audio_files[item].__str__()
 
         level = json.load(open(self.level_jsons[item].__str__(), 'r'))
-        info = json.load(open(self.info_jsons[item].__str__(), 'r'))
+        #info = json.load(open(self.info_jsons[item].__str__(), 'r'))
 
-        bpm = info['_beatsPerMinute']
+        bpm = level['_beatsPerMinute']
         features_rate = bpm*self.opt.beat_subdivision
         notes = level['_notes']
 
@@ -213,6 +215,7 @@ class GeneralBeatSaberDataset(BaseDataset):
                 input_windows = torch.tensor(input_windows)
                 input_windows = (input_windows - input_windows.mean())/torch.abs(input_windows).max()
                 # input_windows = (input_windows.permute(3,0,1,2) - input_windows.mean(-1)).permute(1,2,3,0)
+
                 input_windowss.append(input_windows.float())
         else: #if we are not including context
             if len(y.shape) == 2:

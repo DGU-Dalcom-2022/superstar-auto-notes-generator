@@ -19,8 +19,8 @@ if __name__ == '__main__':
             # 잘못된 이름 수정
             json_path.replace('-', '_')
             
-            song_title = '_'.join(json_path.split('/')[-1].split('_')[:-1])
-            detail_dir = game_dir.split('/')[-1].split('.')[0]+'_'+song_title # 게임 이름 + 음악 이름
+            song_title = '_'.join(json_path.split('\\')[-1].split('_')[:-1])
+            detail_dir = game_dir.split('\\')[-1].split('.')[0]+'_'+song_title # 게임 이름 + 음악 이름
             converter.set_output_path(OUTPUT_DIR+'/'+detail_dir)
             converter.convert(json_path)
 
@@ -29,8 +29,8 @@ if __name__ == '__main__':
             # 잘못된 이름 수정
             song_path.replace('-', '_')
 
-            song_title = song_path.split('/')[-1].split('.')[0]
-            detail_dir = game_dir.split('/')[-1].split('.')[0]+'_'+song_title
+            song_title = song_path.split('\\')[-1].split('.')[0]
+            detail_dir = game_dir.split('\\')[-1].split('.')[0]+'_'+song_title
             preprocessor.set_output_path(OUTPUT_DIR+'/'+detail_dir)
             preprocessor.copy_song_to_output(song_path)
             feature_path = preprocessor.preprocess(song_path)

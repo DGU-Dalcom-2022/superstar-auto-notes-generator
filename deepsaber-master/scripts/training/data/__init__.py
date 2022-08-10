@@ -116,4 +116,5 @@ def create_dataloader(dataset):
                       batch_size=dataset.opt.batch_size if not is_val else dataset.opt.val_batch_size,
                       shuffle=not is_val,
                       collate_fn=meta_collate_fn(dataset.opt.pad_batches,dataset.opt.model),
+                      pin_memory=True,
                       num_workers=dataset.opt.workers)

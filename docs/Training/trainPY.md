@@ -76,7 +76,24 @@
     10x100x1이 아닌 그 중 하나의 리스트가 100이 아닌 97이 된다. expected sequence of length 100 at dim 1 (got 97)
 
 
-
+ # 전체적인 실행 흐름
+  1. opt 파일을 받아서 각 원하는 학습을 진행
+  2. opt 파일에 해당하는 model을 불러옴 ex) ddc => ddc_model.py => DDCModel(BaseModel), DDCNet(nn.Module)
+  3. opt 파일에 해당하는 dataset을 불러옴 => 이 때 전처리된 음악 파일을 가져와서 .dat, .npy 등의 정보를 담아감(audio_file,level_file ... )
+   - 이 때 dataSet의 원형은 torch.utils.data.DataSet이다.
+  4. 만들어둔 dataset을 이용하여 학습 중에 Data를 불러올 dataloader를 생성한다.
+   - 이 때 dataloader의 원형은 torch.utils.data.dataloader이다.
+  5. 모든 준비가 끝나면 설정된 epoch만큼의 반복을 시작한다.
+   - epoch는 준비된 전체 데이터셋에 대해 한 번씩 학습을 진행하면 1이 올라간다.
+  6. 데이터는 데이터셋을 통째로 이용하는 것이 아니라 dataloader에서 batch 값만큼만 불러서 이용한다.
+   - batch는 dataloader에서 설정할 수 있다.
+   - batch 값만큼 데이터를 불렀을 때 이는 data변수에 저장되어 있고, 이 때 input과 target으로 나눠지는데 이는 get_item() 메서드에서 설정된다.
+     target은 정답이라고 생각하면 된다.
+  7. 뽑은 데이터를 model.set_input을 통해 모델에 인풋으로 적용한다.
+  8. optimize_parameters를 진행하며 이 때 forward()와 backward()가 한번씩 진행된다.
+  9. 이후 loss값 계산과 metrics를 통해 학습을 평가한다.
+  10. 이렇게 1 batch 만큼의 학습이 진행된다. 이후 epoch에 도달할 때 까지 반복한다.
+  11. 1 epoch가 지나면 leaning_rate를 업데이트한다.
     
-
+ 학습 관련된 변수들은 opt에 저장되어 있음 제대로 하려면 이를 변형시키면서 진행하는 듯
     

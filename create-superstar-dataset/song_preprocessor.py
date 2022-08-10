@@ -19,7 +19,7 @@ class SongPreprocessor():
             os.makedirs(self.output_path)
 
     def copy_song_to_output(self, song_path):
-        song_title = song_path.split('/')[-1].split('.')[0]
+        song_title = song_path.split('\\')[-1].split('.')[0]
         shutil.copy2(song_path, self.output_path+'/'+song_title+'.egg')
 
     def extract_features_multi_mel(self, y, sr=44100.0, hop=512, nffts=[1024, 2048, 4096], mel_dim=100):
@@ -86,9 +86,9 @@ class SongPreprocessor():
                     blocks_reduced_classes[i, 0] = constants.EMPTY_STATE
         return blocks_reduced_classes
 
-    def preprocess(self, song_path, feature_name='mel', feature_size=100, sampling_rate=44100.0, step_size=0.01):
+    def preprocess(self, song_path, feature_name='multi_mel', feature_size=80, sampling_rate=44100.0, step_size=0.01):
         
-        song_title = song_path.split('/')[-1].split('.')[0]+'.egg'
+        song_title = song_path.split('\\')[-1].split('.')[0]+'.egg'
         feature_path = self.output_path+'/'+song_title+'_'+feature_name+'_'+str(feature_size)+'.npy'
 
         # get song
@@ -108,8 +108,8 @@ class SongPreprocessor():
         return feature_path
     
     def block_reduced(self, song_path, feature_path, level_path, sampling_rate=44100.0, step_size=0.01):
-        song_title = song_path.split('/')[-1].split('.')[0]+'.egg'
-        song_diff = level_path.split('/')[-1].split('.')[0]
+        song_title = song_path.split('\\')[-1].split('.')[0]+'.egg'
+        song_diff = level_path.split('\\')[-1].split('.')[0]
         blocks_reduced_classes_file = self.output_path+'/'+song_title+song_diff+'_blocks_reduced_classes_.npy'
         receptive_field = 1
 

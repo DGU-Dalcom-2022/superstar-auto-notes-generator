@@ -1,7 +1,7 @@
 {
   "time_shifts": 15,
   "load": false,
-  "data_dir": "../../data/extracted_data",
+  "data_dir": "../../../data/extracted_data/ss_short",
   "pad_batches": false,
   "experiment_name": "block_placement_ddc2",
   "entropy_loss_coeff": 0.0,
