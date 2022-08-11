@@ -25,7 +25,7 @@ if __name__ == '__main__':
     for add_item in add_opt:
         opt.__dict__[add_item] = add_opt[add_item]
     opt.gpu_ids = False
-    opt.continue_train = True
+    opt.continue_train = False
     model = create_model(opt)
     model.setup()
     if opt.model=='wavenet' or opt.model=='adv_wavenet':
